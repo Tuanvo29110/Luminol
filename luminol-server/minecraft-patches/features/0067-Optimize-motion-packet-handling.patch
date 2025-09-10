@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tuanvo29110 <tuananh290011@gmail.com>
+Date: Wed, 10 Sep 2025 06:43:03 +0000
+Subject: [PATCH] Optimize: motion packet handling
+
+
+diff --git a/net/minecraft/server/level/ServerEntity.java b/net/minecraft/server/level/ServerEntity.java
+index 3a9293d5328ef0befa0b709169489b61a2266807..0535ab9da8d478fb0658d1c3f2828396117c8859 100644
+--- a/net/minecraft/server/level/ServerEntity.java
++++ b/net/minecraft/server/level/ServerEntity.java
+@@ -225,7 +225,13 @@ public class ServerEntity {
+                                     )
+                                 );
+                         } else {
+-                            this.broadcast.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement));
++                            if (
++                                this.entity instanceof net.minecraft.world.entity.item.ItemEntity ||
++                                    this.entity instanceof net.minecraft.world.entity.projectile.EyeOfEnder ||
++                                    this.entity instanceof net.minecraft.world.entity.animal.Squid
++                            ) {
++                                this.broadcast.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement));
++                            }
+                         }
+                     }
+                     } // SparklyPaper end
