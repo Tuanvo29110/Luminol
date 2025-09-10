@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tuanvo29110 <tuananh290011@gmail.com>
+Date: Wed, 10 Sep 2025 08:17:28 +0000
+Subject: [PATCH] Use Euclidean Distance Squared
+
+
+diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/player/RegionizedPlayerChunkLoader.java b/ca/spottedleaf/moonrise/patches/chunk_system/player/RegionizedPlayerChunkLoader.java
+index 19063b4dc68661f390f2ce559de59299c11f500a..95121c739770d82571ec34d0f1fe1738d8399f2f 100644
+--- a/ca/spottedleaf/moonrise/patches/chunk_system/player/RegionizedPlayerChunkLoader.java
++++ b/ca/spottedleaf/moonrise/patches/chunk_system/player/RegionizedPlayerChunkLoader.java
+@@ -383,8 +383,12 @@ public final class RegionizedPlayerChunkLoader {
+             final int centerZ = PlayerChunkLoaderData.this.lastChunkZ;
+ 
+             return Integer.compare(
+-                Math.abs(c1x - centerX) + Math.abs(c1z - centerZ),
+-                Math.abs(c2x - centerX) + Math.abs(c2z - centerZ)
++                // Canvas start - use Euclidean distance squared
++                me.earthme.luminol.config.modules.optimizations.EuclideanDistanceSquaredConfig.enabled ?
++                    (c1x - centerX) * (c1x - centerX) + (c1z - centerZ) * (c1z - centerZ) : Math.abs(c1x - centerX) + Math.abs(c1z - centerZ),
++                me.earthme.luminol.config.modules.optimizations.EuclideanDistanceSquaredConfig.enabled ?
++                    (c2x - centerX) * (c2x - centerX) + (c2z - centerZ) * (c2z - centerZ) : Math.abs(c2x - centerX) + Math.abs(c2z - centerZ)
++                // Canvas end - use Euclidean distance squared
+             );
+         };
+         private final LongHeapPriorityQueue sendQueue = new LongHeapPriorityQueue(CLOSEST_MANHATTAN_DIST);
