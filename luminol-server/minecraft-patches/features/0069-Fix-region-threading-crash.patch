@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tuanvo29110 <tuananh290011@gmail.com>
+Date: Wed, 10 Sep 2025 07:43:08 +0000
+Subject: [PATCH] Fix region threading crash
+
+
+diff --git a/net/minecraft/world/entity/animal/HappyGhast.java b/net/minecraft/world/entity/animal/HappyGhast.java
+index 272f57aca640e045efca64dd018b221335c667ee..6bb132cffecb2428bc768b479a1ccf7d6ee43354 100644
+--- a/net/minecraft/world/entity/animal/HappyGhast.java
++++ b/net/minecraft/world/entity/animal/HappyGhast.java
+@@ -550,7 +550,7 @@ public class HappyGhast extends Animal {
+             boundingBox.maxZ + 1.0
+         );
+ 
+-        for (Player player : this.level().players()) {
++        for (Player player : this.level().getLocalPlayers()) { // Canvas - region threading - use local players
+             if (!player.isSpectator()) {
+                 Entity rootVehicle = player.getRootVehicle();
+                 if (!(rootVehicle instanceof HappyGhast) && aabb.contains(rootVehicle.position())) {

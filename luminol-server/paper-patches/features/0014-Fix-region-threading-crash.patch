@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tuanvo29110 <tuananh290011@gmail.com>
+Date: Wed, 10 Sep 2025 07:44:24 +0000
+Subject: [PATCH] Fix region threading crash
+
+
+diff --git a/src/main/java/io/papermc/paper/antixray/ChunkPacketBlockControllerAntiXray.java b/src/main/java/io/papermc/paper/antixray/ChunkPacketBlockControllerAntiXray.java
+index ca24f4cd7a50f0156d84e263c60f841cca95c669..5e420b1561e3906ef692e7227f878864cf5a1972 100644
+--- a/src/main/java/io/papermc/paper/antixray/ChunkPacketBlockControllerAntiXray.java
++++ b/src/main/java/io/papermc/paper/antixray/ChunkPacketBlockControllerAntiXray.java
+@@ -184,16 +184,24 @@ public final class ChunkPacketBlockControllerAntiXray extends ChunkPacketBlockCo
+             chunkPacket.setReady(true);
+             return;
+         }
+-
++        
++        // Canvas start - region threading
++        // from bellow
++        LevelChunk chunk = chunkPacketInfo.getChunk();
++        int x = chunk.getPos().x;
++        int z = chunk.getPos().z;
+         if (!Bukkit.isPrimaryThread()) {
+             // Plugins?
+-            MinecraftServer.getServer().scheduleOnMain(() -> modifyBlocks(chunkPacket, chunkPacketInfo));
++            MinecraftServer.getServer().regionizedServer.taskQueue.queueChunkTask(
++                chunk.level, x, z, () -> {
++                    modifyBlocks(chunkPacket, chunkPacketInfo);
++                }
++            );
++        // Canvas end - region threading
+             return;
+         }
+ 
+-        LevelChunk chunk = chunkPacketInfo.getChunk();
+-        int x = chunk.getPos().x;
+-        int z = chunk.getPos().z;
++        // Canvas - region threading - move up
+         Level level = chunk.getLevel();
+         ((ChunkPacketInfoAntiXray) chunkPacketInfo).setNearbyChunks(level.getChunkIfLoaded(x - 1, z), level.getChunkIfLoaded(x + 1, z), level.getChunkIfLoaded(x, z - 1), level.getChunkIfLoaded(x, z + 1));
+         executor.execute((Runnable) chunkPacketInfo);
